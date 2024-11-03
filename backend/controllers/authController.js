@@ -57,7 +57,7 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     console.log("Login function called");
-    console.log("Request Body:", req.body); // Log the request body
+
     try {
         const { email, password } = req.body;
 
@@ -79,15 +79,18 @@ const login = async (req, res) => {
         }
 
         // Generate token and set in response
-        generateTokenAndSetCookie(user._id, res);
+        const token = generateTokenAndSetCookie(user._id, res);
         const { password: _, ...userData } = user.toObject();
-        res.status(200).json({ success: true, message: "User logged in successfully", user: userData });
+
+        // Include user data and token in the response
+        res.status(200).json({ success: true, user: userData, token });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+
 
 
 const logout = async (req, res) => {
@@ -102,7 +105,7 @@ const logout = async (req, res) => {
 async function authCheck(req, res) {
     try {
         console.log("req.user:", req.user);
-        res.status(200).json({ success: true, user: req.user });
+        res.status(200).json({ success: true, user: req.user, token: req.token });
     } catch (error) {
         console.log("Error in authCheck controller", error.message);
         res.status(500).json({ success: false, message: "Internal server error" });

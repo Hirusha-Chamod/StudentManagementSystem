@@ -12,30 +12,34 @@ import {
     Typography,
     Container,
     createTheme,
-    ThemeProvider
+    ThemeProvider,
+    Select,
+    MenuItem,
+    InputLabel,
+    FormControl,
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../../api/auth/auth';
+import {  useSelector } from 'react-redux';
+import { signUpUser } from '../../api/auth/auth';
 
 
 const defaultTheme = createTheme();
 
-export default function LoginForm() {
+export default function SignUp() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const dispatch = useDispatch();
+    const [name, setName] = useState('');
+    const [role, setRole] = useState('student'); // Default role
 
 
-    // Access the user state to check if the user is logged in
-    const user = useSelector((state) => state.user.value);
     const loading = useSelector((state) => state.user.loading);
     const error = useSelector((state) => state.user.error);
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        dispatch(loginUser(email, password)); // Dispatch the loginUser action with email and password
+        signUpUser(email, password, name, role);
     };
+
     return (
         <ThemeProvider theme={defaultTheme}>
             <Container component="main" maxWidth="xs">
@@ -52,9 +56,21 @@ export default function LoginForm() {
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Sign in
+                        Sign Up
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="name"
+                            label="Full Name"
+                            name="name"
+                            autoComplete="name"
+                            autoFocus
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
                         <TextField
                             margin="normal"
                             required
@@ -63,7 +79,6 @@ export default function LoginForm() {
                             label="Email Address"
                             name="email"
                             autoComplete="email"
-                            autoFocus
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -79,9 +94,20 @@ export default function LoginForm() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+                        <FormControl fullWidth margin="normal" required>
+                            <InputLabel id="role-label">Role</InputLabel>
+                            <Select
+                                labelId="role-label"
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                            >
+                                <MenuItem value="student">Student</MenuItem>
+                                <MenuItem value="teacher">Teacher</MenuItem>
+                            </Select>
+                        </FormControl>
                         <FormControlLabel
-                            control={<Checkbox value="remember" color="primary" />}
-                            label="Remember me"
+                            control={<Checkbox value="terms" color="primary" />}
+                            label="I agree to the terms and conditions"
                         />
                         <Button
                             type="submit"
@@ -90,23 +116,13 @@ export default function LoginForm() {
                             sx={{ mt: 3, mb: 2 }}
                             disabled={loading}
                         >
-                            {loading ? 'Signing In...' : 'Sign In'}
+                            {loading ? 'Signing Up...' : 'Sign Up'}
                         </Button>
                         {error && <Typography color="error">{error}</Typography>}
-                        {user && (
-                            <Typography color="primary">
-                                Welcome, {user.name || 'User'}!
-                            </Typography>
-                        )}
                         <Grid container>
                             <Grid item xs>
-                                <Link href="#" variant="body2">
-                                    Forgot password?
-                                </Link>
-                            </Grid>
-                            <Grid item>
-                                <Link href="/signup" variant="body2">
-                                    {"Don't have an account? Sign Up"}
+                                <Link href="/login" variant="body2">
+                                    Already have an account? Sign In
                                 </Link>
                             </Grid>
                         </Grid>
