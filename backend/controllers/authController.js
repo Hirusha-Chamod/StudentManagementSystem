@@ -4,6 +4,7 @@ const generateTokenAndSetCookie = require('../utils/generateToken');
 
 const signup = async (req, res) => {
     console.log("Signup function called");
+    console.log("Request Body:", req.body); // Log the request body
     try {
         const { email, password, name, profilePicture, role } = req.body;
 
@@ -56,6 +57,7 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
     console.log("Login function called");
+    console.log("Request Body:", req.body); // Log the request body
     try {
         const { email, password } = req.body;
 
@@ -78,7 +80,8 @@ const login = async (req, res) => {
 
         // Generate token and set in response
         generateTokenAndSetCookie(user._id, res);
-        res.status(200).json({ success: true, message: "User logged in successfully" });
+        const { password: _, ...userData } = user.toObject();
+        res.status(200).json({ success: true, message: "User logged in successfully", user: userData });
 
     } catch (error) {
         console.error(error);
@@ -86,4 +89,24 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { signup, login };
+
+const logout = async (req, res) => {
+    try {
+        res.clearCookie("jwt-edu");
+        res.status(200).json({ success: true, message: "Logged out successfully" })
+    } catch (error) {
+        console.log("Error in logout controller", error.message)
+    }
+}
+
+async function authCheck(req, res) {
+    try {
+        console.log("req.user:", req.user);
+        res.status(200).json({ success: true, user: req.user });
+    } catch (error) {
+        console.log("Error in authCheck controller", error.message);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+}
+
+module.exports = { signup, login, logout, authCheck };
